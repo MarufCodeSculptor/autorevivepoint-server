@@ -1,6 +1,6 @@
 const express = require('express');
 const cors = require('cors');
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config();
 
 
@@ -34,13 +34,21 @@ const servicesCollection=client.db('autoRevivePoint').collection('services');
 
    
 
-
+// getting all data 
 app.get('/services',async (req,res)=>{
      console.log('services hited');
       const cursor=servicesCollection.find({});
       const result= await cursor.toArray();
       res.send(result)
-})
+});
+// getting single data  
+app.get('/services/:id', async(req,res)=>{
+  console.log(`getting data by id hitted`);
+       const id=req.params.id;
+       const query={ _id: new ObjectId(id) };
+       const result  =await servicesCollection.findOne(query);
+       res.send(result)
+});
 
 
 
