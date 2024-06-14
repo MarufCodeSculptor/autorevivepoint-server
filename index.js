@@ -19,6 +19,7 @@ app.use(express.json());
 app.use(purser());
 
 // midlewere functions = >
+
 const logger = async (req, res, next) => {
   let fullUrl = req.protocol + '://' + req.get('host') + req.originalUrl;
   console.log(`hitted to  ${fullUrl}`);
@@ -40,6 +41,7 @@ const verifyToken = async (req, res, next) => {
     next();
   });
 };
+// midlewere function ended here ... 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster1.6mzg5rv.mongodb.net/?retryWrites=true&w=majority&appName=Cluster1`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -61,9 +63,12 @@ async function run() {
       .db('autoRevivePoint')
       .collection('bookings');
     //  data collection ended
+    
+
     //  posting  loggedin users =>
     app.post('/user', logger, async (req, res) => {
       const user = req.body;
+
       var token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
         expiresIn: '1h',
       });
@@ -76,6 +81,13 @@ async function run() {
         .send({ success: true });
     });
 
+    app.post('/logout',logger,async(req,res)=>{
+      const data= req.body;
+      console.log(data);
+      res.clearCookie('userToken',{maxAge:0}).send('logout called success')
+    })
+
+    
     // getting all data
     app.get('/services', logger, async (req, res) => {
       const cursor = servicesCollection.find({});
@@ -94,9 +106,10 @@ async function run() {
     });
     // getting bookings  all =>
     app.get('/bookings', logger, verifyToken, async (req, res) => {
-      if (req.query?.email !== req.user.email){
+      if (req.query?.email !== req.user.email) {
         return res.status(403).send({ message: 'unthorized' });
       }
+
       let query = {};
       if (req.query?.email) {
         query = { email: req.query?.email };
@@ -150,3 +163,5 @@ app.get('/', (req, res) => {
 app.listen(port, () => {
   console.log(`Working at PORT:${port}`);
 });
+
+
