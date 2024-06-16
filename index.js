@@ -25,6 +25,7 @@ const logger = async (req, res, next) => {
   console.log(`hitted to  ${fullUrl}`);
   next();
 };
+
 const verifyToken = async (req, res, next) => {
   const token = await req.cookies?.userToken;
 
@@ -41,7 +42,8 @@ const verifyToken = async (req, res, next) => {
     next();
   });
 };
-// midlewere function ended here ... 
+// midlewere function ended here ...
+
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster1.6mzg5rv.mongodb.net/?retryWrites=true&w=majority&appName=Cluster1`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -63,7 +65,6 @@ async function run() {
       .db('autoRevivePoint')
       .collection('bookings');
     //  data collection ended
-    
 
     //  posting  loggedin users =>
     app.post('/user', logger, async (req, res) => {
@@ -81,13 +82,12 @@ async function run() {
         .send({ success: true });
     });
 
-    app.post('/logout',logger,async(req,res)=>{
-      const data= req.body;
+    app.post('/logout', logger, async (req, res) => {
+      const data = req.body;
       console.log(data);
-      res.clearCookie('userToken',{maxAge:0}).send('logout called success')
-    })
+      res.clearCookie('userToken', { maxAge: 0 }).send('logout called success');
+    });
 
-    
     // getting all data
     app.get('/services', logger, async (req, res) => {
       const cursor = servicesCollection.find({});
@@ -146,12 +146,9 @@ async function run() {
       const result = await bookingsCollection.updateOne(filter, updateDoc);
       res.send(result);
     });
-    // Send a ping to confirm a successful connection
-    await client.db('admin').command({ ping: 1 });
+    
 
-    console.log(
-      '\x1b[32mPinged your deployment. You successfully connected to MongoDB!\x1b[0m'
-    );
+    
   } finally {
   }
 }
@@ -163,5 +160,3 @@ app.get('/', (req, res) => {
 app.listen(port, () => {
   console.log(`Working at PORT:${port}`);
 });
-
-
