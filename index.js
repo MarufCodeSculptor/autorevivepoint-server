@@ -11,7 +11,7 @@ const port = process.env.PORT || 5000;
 // midleweres
 app.use(
   cors({
-    origin: ['http://localhost:5173'],
+    origin: ['http://localhost:5173', 'https://autorevivepoint.web.app/'],
     credentials: true,
   })
 );
@@ -55,6 +55,13 @@ const client = new MongoClient(uri, {
   },
 });
 
+const cookieOptions = {
+  httpOnly: true,
+  sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
+  secure: process.env.NODE_ENV === 'production' ? true : false,
+};
+//localhost:5000 and localhost:5173 are treated as same site.  so sameSite value must be strict in development server.  in production sameSite will be none
+// in development server secure will false .  in production secure will be true
 async function run() {
   try {
     //  data collections => start
@@ -74,18 +81,15 @@ async function run() {
         expiresIn: '1h',
       });
 
-      res
-        .cookie('userToken', token, {
-          httpOnly: true,
-          secure: false,
-        })
-        .send({ success: true });
+      res.cookie('userToken', token, cookieOptions).send({ success: true });
     });
 
     app.post('/logout', logger, async (req, res) => {
       const data = req.body;
       console.log(data);
-      res.clearCookie('userToken', { maxAge: 0 }).send('logout called success');
+      res
+        .clearCookie('userToken', { ...cookieOptions, maxAge: 0 })
+        .send('logout called success');
     });
 
     // getting all data
@@ -146,9 +150,6 @@ async function run() {
       const result = await bookingsCollection.updateOne(filter, updateDoc);
       res.send(result);
     });
-    
-
-    
   } finally {
   }
 }
